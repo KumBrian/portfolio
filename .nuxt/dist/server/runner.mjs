@@ -1,0 +1,1 @@
+export { default } from "file:///Users/macbookair/Desktop/apps/portfolio/node_modules/@nuxt/vite-builder/dist/vite-node-runner.mjs"
