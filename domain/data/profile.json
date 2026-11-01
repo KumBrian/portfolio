@@ -1,0 +1,100 @@
+{
+  "name": "Kum Brian Ihimbru",
+  "title": "Full-Stack Application Developer",
+  "location": "Cameroon",
+  "website": "https://kumbrian.vercel.app/",
+  "github": "https://github.com/KumBrian",
+  "updated": "2026-11-01",
+  "summary": "Application developer experienced in building mobile apps, enterprise web interfaces and backend services across environmental technology, fisheries commerce, HR, payments and trading. Hands-on with React Native/Expo, Flutter, Kotlin, Nuxt.js, Next.js and Java/Spring Boot.",
+  "intro": "I build practical mobile apps, enterprise web platforms and backend services. My work spans air-quality monitoring, fisheries marketplaces, HR systems, payments and trading tools.",
+  "about": "I am a full-stack application developer and Computer Science graduate of the University of Buea. At DHI, I progressed from an internship to a full-time application-development role, working across mobile, frontend and backend development. I also build independent client websites that make specialized organizations and their content easier to discover and manage.",
+  "education": { "degree": "BSc Computer Science", "institution": "University of Buea", "location": "Cameroon" },
+  "experience": [
+    {
+      "title": "Application Developer",
+      "company": "DHI",
+      "period": "December 2025 – Present",
+      "type": "Full-time",
+      "highlights": [
+        "Developed enterprise web features across HR, merchant-account and administrative workflows with Nuxt.js.",
+        "Built a Java/Spring Boot collections and contributions microservice supporting group contributions, anonymous collections, subscriptions and invoice/document generation.",
+        "Implemented Kotlin mobile trading experiences and chart-linked chat functionality for market discussion and trade planning."
+      ]
+    },
+    {
+      "title": "Software Development Intern",
+      "company": "DHI",
+      "period": "April 2025 – November 2025",
+      "type": "Internship",
+      "highlights": [
+        "Developed React Native/Expo features for an air-quality app with localized AQI, health guidance and articles.",
+        "Built Flutter fisheries-marketplace features for catch listings, bidding/counter-offers and buyer–seller messaging."
+      ]
+    }
+  ],
+  "skills": [
+    { "category": "Mobile", "tools": "React Native, Expo, Flutter, Kotlin", "evidence": "Henddu · Siren · Easy Trade" },
+    { "category": "Frontend", "tools": "Nuxt.js, Next.js", "evidence": "Fluxoon · CCA Pay · RuralNexus · MUMA Solution" },
+    { "category": "Backend", "tools": "Java, Spring Boot", "evidence": "CCA Pay collections and contributions microservice" },
+    { "category": "Data & CMS", "tools": "PostgreSQL, Supabase, Payload CMS", "evidence": "RuralNexus · MUMA Solution" },
+    { "category": "Deployment", "tools": "Render", "evidence": "RuralNexus" }
+  ],
+  "projects": [
+    {
+      "title": "CCA Pay", "category": "Payments & merchant services", "engagement": "Professional", "organization": "DHI", "filters": ["Frontend", "Backend", "Enterprise"],
+      "role": "Full-stack contributor", "tech": ["Nuxt.js", "Java", "Spring Boot"], "color": "#67e8f9",
+      "description": "A merchant and administration payment platform with tools for collections, contributions and subscriptions.",
+      "contribution": "Built merchant/admin interfaces and a Spring Boot collections and contributions microservice.",
+      "highlights": ["Developed merchant views for payment accounts, service-related payment configuration and administration.", "Built open/anonymous collections and group-based recurring contributions (tontine/njangui).", "Implemented subscription use cases and invoice/document generation."],
+      "evidence": "Team project. The features listed describe my individual contribution."
+    },
+    {
+      "title": "Fluxoon", "category": "Enterprise HR technology", "engagement": "Professional", "organization": "DHI", "filters": ["Frontend", "Enterprise"],
+      "role": "Frontend contributor", "tech": ["Nuxt.js"], "color": "#c4b5fd",
+      "description": "An organization-focused HR platform for people, operations, documentation and employee self-service.",
+      "contribution": "Developed HR administration and employee self-service interfaces across workforce workflows.",
+      "highlights": ["Built organization-facing employee, career, attendance, absence and leave interfaces.", "Contributed to employee self-service and administrative web experiences.", "Developed frontend workflows for HR information and documents."],
+      "evidence": "Team project. The features listed describe my individual contribution."
+    },
+    {
+      "title": "Easy Trade", "category": "Trading technology", "engagement": "Professional", "organization": "DHI", "filters": ["Mobile"],
+      "role": "Mobile frontend engineer", "tech": ["Kotlin"], "color": "#fcd34d",
+      "description": "A mobile trading experience with market charts and tools for trader communication.",
+      "contribution": "Developed Kotlin trading interfaces and chart-linked chat for market discussion and trade planning.",
+      "highlights": ["Worked on Kotlin mobile trading and chart interfaces.", "Designed and developed chart-linked trading chat for market study, discussion and trade planning.", "Implemented interactions for information-dense trading workflows."],
+      "evidence": "Team project. The features listed describe my individual contribution."
+    },
+    {
+      "title": "Siren", "category": "Fisheries marketplace", "engagement": "Professional", "organization": "DHI", "filters": ["Mobile"],
+      "role": "Mobile application developer", "tech": ["Flutter"], "color": "#6ee7b7",
+      "description": "A fisheries marketplace connecting catch sellers with potential buyers.",
+      "contribution": "Built catch listings, bid negotiation and buyer–seller messaging flows in Flutter.",
+      "highlights": ["Built fisherman-facing catch listings and upload workflows.", "Developed buyer discovery, bidding, counter-offer and price negotiation interactions.", "Worked on buyer–seller chat for coordinating fulfillment and delivery arrangements."],
+      "evidence": "Team project. The features listed describe my individual contribution."
+    },
+    {
+      "title": "Henddu", "category": "Air-quality information", "engagement": "Professional", "organization": "DHI", "filters": ["Mobile"],
+      "role": "Mobile application developer", "tech": ["React Native", "Expo"], "color": "#93c5fd",
+      "description": "A mobile app that presents local air-quality information alongside health-oriented guidance and articles.",
+      "contribution": "Implemented location-aware AQI viewing, environmental data presentation and guidance experiences.",
+      "highlights": ["Implemented mobile features for location-aware air-quality index viewing.", "Worked on environmental data presentation and related health guidance.", "Developed news and article experiences for users."],
+      "evidence": "Team project. The features listed describe my individual contribution."
+    },
+    {
+      "title": "RuralNexus", "category": "Research & rural development", "engagement": "Independent client", "organization": "RuralNexus", "filters": ["Frontend", "Client Sites"],
+      "role": "Independent web developer", "tech": ["Nuxt.js", "PostgreSQL", "Supabase", "Render"], "color": "#bef264",
+      "description": "An organizational website presenting rural resilience, agrifood systems, research and knowledge exchange.",
+      "contribution": "Built the public website and structured content around the organization’s mission, programs and resources.",
+      "highlights": ["Built the responsive public-facing organizational website.", "Structured content around the mission, programs, projects and communications.", "Used PostgreSQL/Supabase for data services and Render in the deployment workflow."],
+      "url": "https://ruralnexus.org/", "evidence": "Public client website. Website development and the listed implementation are my contribution."
+    },
+    {
+      "title": "MUMA Solution", "category": "Technology consultancy", "engagement": "Independent client", "organization": "MUMA Solution", "filters": ["Frontend", "Client Sites"],
+      "role": "Independent full-stack/web developer", "tech": ["Next.js", "Payload CMS"], "color": "#f9a8d4",
+      "description": "A website for a specialist Splunk consultancy, presenting services, company capabilities and articles.",
+      "contribution": "Built the consultancy website with managed article publishing and team profiles.",
+      "highlights": ["Developed the consultancy website with Next.js and Payload CMS.", "Enabled editorial article publishing and team-member profile management.", "Structured public service information, company capabilities and informational resources."],
+      "url": "https://mumasolution.com/", "evidence": "Public client website. Website development and the listed implementation are my contribution."
+    }
+  ]
+}

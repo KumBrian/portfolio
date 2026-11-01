@@ -1,208 +1,107 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import profile from '../../domain/data/profile.json'
+import AbstractSculpture from './AbstractSculpture.vue'
 
-// --- Spotlight ---
-const mouseX = ref(50)
-const mouseY = ref(50)
-const headerRef = ref<HTMLElement | null>(null)
+const motionPaused = ref(true)
+let motionPreference: MediaQueryList | undefined
 
-// --- Trail ---
-interface TrailPoint {
-  x: number
-  y: number
-  id: number
-  isBrace: boolean
-  opacity: number
+function setMotion(paused: boolean) {
+  motionPaused.value = paused
+  document.documentElement.dataset.motion = paused ? 'paused' : 'running'
 }
-
-const trail = ref<TrailPoint[]>([])
-let trailCounter = 0
-const MAX_TRAIL = 36
-// Each point is randomly a brace OR a glow — decided at creation
-const BRACE_CHANCE = 0.4
-
-let animFrame: number
-let lastX = 0
-let lastY = 0
-
-function onMouseMove(e: MouseEvent) {
-  const el = headerRef.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-
-  // Spotlight (percentage)
-  mouseX.value = (x / rect.width) * 100
-  mouseY.value = (y / rect.height) * 100
-
-  // Only add trail point if cursor moved enough (hysteresis)
-  const dx = x - lastX
-  const dy = y - lastY
-  if (Math.sqrt(dx * dx + dy * dy) < 6) return
-  lastX = x
-  lastY = y
-
-  trail.value.push({
-    x,
-    y,
-    id: trailCounter++,
-    isBrace: Math.random() < BRACE_CHANCE,
-    opacity: 1,
-  })
-
-  if (trail.value.length > MAX_TRAIL) {
-    trail.value.shift()
-  }
-}
-
-function onMouseLeave() {
-  mouseX.value = 50
-  mouseY.value = 50
-}
-
-// Slow fade — ~0.018/frame ≈ ~3s lifetime at 60fps
-function tickFade() {
-  trail.value = trail.value
-    .map(p => ({ ...p, opacity: p.opacity - 0.018 }))
-    .filter(p => p.opacity > 0)
-  animFrame = requestAnimationFrame(tickFade)
-}
-
-onMounted(() => { animFrame = requestAnimationFrame(tickFade) })
-onUnmounted(() => cancelAnimationFrame(animFrame))
-
-const letters = 'Kum Brian Ihimbru'.split('')
+function syncMotionPreference(event: MediaQueryListEvent) { setMotion(event.matches) }
+onMounted(() => {
+  motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
+  setMotion(motionPreference.matches)
+  motionPreference.addEventListener('change', syncMotionPreference)
+})
+onBeforeUnmount(() => { motionPreference?.removeEventListener('change', syncMotionPreference) })
 </script>
 
 <template>
-  <header
-    ref="headerRef"
-    class="relative overflow-hidden bg-[#050810] border-b border-white/5"
-    style="min-height: 340px;"
-    @mousemove="onMouseMove"
-    @mouseleave="onMouseLeave"
-  >
-    <!-- Spotlight — smaller, sharper -->
-    <div
-      class="absolute inset-0 pointer-events-none transition-[background] duration-75"
-      :style="{
-        background: `radial-gradient(280px circle at ${mouseX}% ${mouseY}%, rgba(6,182,212,0.18) 0%, rgba(139,92,246,0.08) 40%, transparent 70%)`
-      }"
-    />
-
-    <!-- Trail points -->
-    <template v-for="(pt, i) in trail" :key="pt.id">
-      <!-- {} brace — random color from booster palette -->
-      <span
-        v-if="pt.isBrace"
-        class="absolute pointer-events-none select-none font-mono font-black leading-none"
-        :style="{
-          left: `${pt.x}px`,
-          top: `${pt.y}px`,
-          opacity: pt.opacity * 0.85,
-          fontSize: `${8 + (i / trail.length) * 10}px`,
-          transform: 'translate(-50%, -50%)',
-          color: i / trail.length > 0.6 ? '#fff' : i / trail.length > 0.3 ? '#06b6d4' : '#a78bfa',
-          textShadow: `0 0 ${6 + (i / trail.length) * 10}px ${
-            i / trail.length > 0.6 ? 'rgba(255,255,255,0.9)' : i / trail.length > 0.3 ? 'rgba(6,182,212,0.9)' : 'rgba(167,139,250,0.9)'
-          }`,
-        }"
-      >{}</span>
-
-      <!-- Booster glow dot — white-hot core → cyan ring → violet tail -->
-      <div
-        v-else
-        class="absolute rounded-full pointer-events-none"
-        :style="{
-          left: `${pt.x}px`,
-          top: `${pt.y}px`,
-          width: `${5 + (i / trail.length) * 12}px`,
-          height: `${5 + (i / trail.length) * 12}px`,
-          opacity: pt.opacity,
-          background: i / trail.length > 0.65
-            ? `radial-gradient(circle, rgba(255,255,255,1) 0%, rgba(6,182,212,0.8) 35%, rgba(139,92,246,0.3) 70%, transparent 100%)`
-            : i / trail.length > 0.3
-            ? `radial-gradient(circle, rgba(6,182,212,0.9) 0%, rgba(139,92,246,0.5) 50%, transparent 100%)`
-            : `radial-gradient(circle, rgba(139,92,246,0.7) 0%, rgba(59,7,100,0.2) 70%, transparent 100%)`,
-          transform: 'translate(-50%, -50%)',
-          filter: `blur(${1 + (1 - i / trail.length) * 2}px)`,
-        }"
-      />
-    </template>
-
-    <!-- Static ambient glows -->
-    <div class="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-violet-600/5 blur-[120px] pointer-events-none" />
-    <div class="absolute -bottom-20 right-1/4 w-[400px] h-[400px] rounded-full bg-cyan-400/5 blur-[100px] pointer-events-none" />
-
-    <!-- Dot grid -->
-    <div class="absolute inset-0 pointer-events-none dot-grid opacity-40" />
-
-    <div class="relative max-w-5xl mx-auto px-6 py-16">
-      <!-- Status chip -->
-      <div class="inline-flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-400/8 border border-emerald-400/20 px-3 py-1.5 rounded-full mb-8">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-        Available for work
+  <header id="home" class="editorial-hero">
+    <div class="page-shell">
+      <div class="editorial-hero__intro">
+        <p class="editorial-hero__identity"><span class="editorial-hero__identity-mark" aria-hidden="true" />{{ profile.name }}</p>
+        <p class="editorial-hero__location">Based in {{ profile.location }} <span aria-hidden="true">↗</span></p>
       </div>
-
-      <!-- Animated name -->
-      <h1 class="text-5xl sm:text-6xl font-black tracking-tight text-white mb-4 leading-none">
-        <span
-          v-for="(char, i) in letters"
-          :key="i"
-          class="letter-hover inline-block transition-all duration-300"
-          :style="{ animationDelay: `${i * 40}ms` }"
-        >{{ char === ' ' ? '\u00a0' : char }}</span>
-      </h1>
-
-      <!-- Role tags -->
-      <div class="flex flex-wrap gap-4 mb-6">
-        <span
-          v-for="tag in ['Full Stack Developer', '3 Years Exp.', 'BSc. Comp. Sci. · UBa']"
-          :key="tag"
-          class="text-sm text-slate-400 font-mono"
-        >
-          <span class="text-cyan-500">//</span> {{ tag }}
-        </span>
+      <div class="editorial-hero__grid">
+        <div class="editorial-hero__copy">
+          <p class="editorial-hero__role">{{ profile.title }}</p>
+          <h1>Good ideas.<br><span>Built to work.</span></h1>
+          <p class="editorial-hero__description">{{ profile.intro }}</p>
+          <div class="editorial-hero__actions">
+            <a class="editorial-hero__primary" href="#work">View selected work<span class="editorial-hero__button-icon" aria-hidden="true">↗</span></a>
+            <a class="editorial-hero__download" href="/Kum_Brian_Ihimbru_CV.pdf" download>Download CV <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="editorial-hero__note"><span aria-hidden="true">↳</span> From the first interaction to the system behind it.</p>
+        </div>
+        <figure class="editorial-hero__artwork">
+          <div class="editorial-hero__artwork-top" aria-hidden="true"><span>Ideas, connected.</span><span>Fig. 001</span></div>
+          <AbstractSculpture :motion-paused="motionPaused" />
+          <figcaption class="editorial-hero__artwork-caption">
+            <span class="editorial-hero__artwork-label"><span aria-hidden="true">✳</span> A study in connection</span>
+            <button class="editorial-hero__motion" type="button" :aria-pressed="motionPaused" :aria-label="motionPaused ? 'Resume decorative motion' : 'Pause decorative motion'" @click="setMotion(!motionPaused)">
+              <svg v-if="motionPaused" viewBox="0 0 12 12" aria-hidden="true"><path d="m4 2 6 4-6 4Z" fill="currentColor" /></svg>
+              <svg v-else viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2h2v8H3zm4 0h2v8H7z" fill="currentColor" /></svg>
+              {{ motionPaused ? 'Play motion' : 'Pause motion' }}
+            </button>
+          </figcaption>
+        </figure>
       </div>
-
-      <!-- Bio -->
-      <p class="text-slate-400 text-base max-w-xl leading-relaxed mb-8">
-        I design and build mobile apps, web platforms, and backend systems — clean architecture, shipped fast.
-      </p>
-
-      <!-- Tech badges -->
-      <div class="flex flex-wrap gap-2">
-        <span
-          v-for="badge in ['Flutter', 'React Native', 'Nuxt 3', 'Spring Boot', 'Go', 'Figma', 'Rive', 'Photoshop']"
-          :key="badge"
-          class="text-xs font-mono px-3 py-1 rounded-md bg-white/5 text-slate-300 border border-white/10 hover:border-cyan-400/40 hover:text-cyan-300 transition-all duration-200 cursor-default"
-        >
-          {{ badge }}
-        </span>
+      <div class="editorial-hero__footer">
+        <p>Thoughtful interfaces. <span>Dependable systems.</span></p>
+        <div class="editorial-hero__disciplines" aria-label="Development disciplines"><span>Mobile</span><span>Web</span><span>Backend</span></div>
+        <a href="#work" class="editorial-hero__scroll" aria-label="Explore selected work below"><span aria-hidden="true">↓</span></a>
       </div>
     </div>
   </header>
 </template>
 
 <style scoped>
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(148,163,184,0.15) 1px, transparent 1px);
-  background-size: 28px 28px;
-}
-
-@keyframes letter-drop {
-  0%   { opacity: 0; transform: translateY(-20px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-.letter-hover {
-  animation: letter-drop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.letter-hover:hover {
-  color: #67e8f9;
-  transform: translateY(-4px) scale(1.1);
-}
+.editorial-hero { color: var(--ink, #1b1d19); background: var(--paper, #efeee8); overflow: hidden; }
+.editorial-hero__intro { display: flex; align-items: center; justify-content: space-between; padding-top: 36px; gap: 24px; }
+.editorial-hero__identity, .editorial-hero__location, .editorial-hero__role, .editorial-hero__artwork-top, .editorial-hero__artwork-caption, .editorial-hero__disciplines, .editorial-hero__note { font-family: var(--font-mono, monospace); font-size: 11px; line-height: 1.5; }
+.editorial-hero__identity { display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: .075em; }
+.editorial-hero__identity-mark { width: 7px; height: 7px; background: var(--ink, #1b1d19); display: inline-block; border-radius: 50%; }
+.editorial-hero__location { color: var(--muted, #66695f); }
+.editorial-hero__location span { margin-left: 24px; color: var(--ink, #1b1d19); }
+.editorial-hero__grid { display: grid; grid-template-columns: 1.06fr 1fr; gap: 22px; align-items: center; padding: 54px 0 64px; }
+.editorial-hero__copy { position: relative; z-index: 1; padding-bottom: 4px; }
+.editorial-hero__role { color: var(--muted, #66695f); text-transform: uppercase; letter-spacing: .07em; margin: 0 0 30px; }
+.editorial-hero h1 { font-family: var(--font-display, sans-serif); font-size: clamp(64px, 7.2vw, 112px); font-weight: 600; line-height: .99; letter-spacing: -.07em; margin: 0 0 32px; }
+.editorial-hero h1 span { white-space: nowrap; }
+.editorial-hero__description { max-width: 440px; font-family: var(--font-body, sans-serif); font-size: clamp(15px, 1.2vw, 17px); line-height: 1.7; color: var(--muted, #66695f); margin: 0; }
+.editorial-hero__actions { display: flex; align-items: center; flex-wrap: wrap; gap: 18px 26px; margin-top: 32px; font-family: var(--font-body, sans-serif); font-size: 13px; font-weight: 500; }
+.editorial-hero__primary { display: inline-flex; align-items: center; gap: 25px; min-height: 54px; background: var(--ink, #1b1d19); color: var(--paper, #efeee8); border-radius: 30px; padding: 7px 8px 7px 23px; text-decoration: none; transition: background .2s, transform .2s; }
+.editorial-hero__button-icon { width: 38px; height: 38px; border-radius: 50%; background: var(--acid, #d4fa72); color: var(--ink, #1b1d19); display: inline-flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 400; transition: transform .25s; }
+.editorial-hero__primary:hover .editorial-hero__button-icon { transform: rotate(45deg); }
+.editorial-hero__primary:hover { background: #35392f; }
+.editorial-hero__download { text-decoration: none; display: inline-flex; gap: 16px; align-items: center; min-height: 44px; border-bottom: 1px solid var(--line, #d3d5c9); color: var(--ink, #1b1d19); }
+.editorial-hero__download span { font-size: 20px; }
+.editorial-hero__download:hover { border-bottom-color: var(--ink, #1b1d19); }
+.editorial-hero__note { margin-top: 26px; color: var(--muted, #66695f); font-size: 10px; letter-spacing: -.015em; }
+.editorial-hero__note span { margin-right: 6px; }
+.editorial-hero__artwork { margin: 0; align-self: center; min-width: 0; }
+.editorial-hero__artwork-top { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 12px; color: var(--muted, #66695f); text-transform: uppercase; letter-spacing: .08em; font-size: 9px; }
+.editorial-hero__artwork-caption { border-top: 1px solid var(--line, #d3d5c9); padding-top: 9px; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--muted, #66695f); font-size: 9px; }
+.editorial-hero__artwork-label { display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: .05em; }
+.editorial-hero__artwork-label > span { font-family: serif; color: var(--ink, #1b1d19); font-size: 23px; }
+.editorial-hero__motion { appearance: none; background: none; border: 0; font: inherit; color: var(--ink, #1b1d19); display: inline-flex; align-items: center; gap: 7px; padding: 10px 0 10px 8px; cursor: pointer; min-height: 44px; white-space: nowrap; }
+.editorial-hero__motion svg { width: 12px; height: 12px; }
+.editorial-hero__footer { display: flex; align-items: center; gap: 24px; min-height: 88px; border-top: 1px solid var(--line, #d3d5c9); }
+.editorial-hero__footer > p { font-family: var(--font-body, sans-serif); font-size: 12px; margin-right: auto; }
+.editorial-hero__footer > p > span { color: var(--muted, #66695f); margin-left: 4px; }
+.editorial-hero__disciplines { display: flex; align-items: center; gap: 24px; text-transform: uppercase; font-size: 10px; letter-spacing: .07em; }
+.editorial-hero__disciplines span + span::before { content: '/'; margin-right: 24px; color: #a3a69a; }
+.editorial-hero__scroll { display: flex; align-items: center; justify-content: center; border: 1px solid var(--line, #d3d5c9); border-radius: 50%; width: 42px; height: 42px; font-size: 22px; text-decoration: none; color: var(--ink, #1b1d19); margin-left: 20px; transition: background .2s; }
+.editorial-hero__scroll:hover { background: var(--acid, #d4fa72); }
+.editorial-hero a:focus-visible, .editorial-hero button:focus-visible { outline: 2px solid var(--ink, #1b1d19); outline-offset: 5px; }
+@media (min-width: 1440px) { .editorial-hero__grid { gap: 48px; padding-top: 66px; padding-bottom: 78px; } }
+@media (max-width: 1100px) { .editorial-hero__grid { gap: 8px; } .editorial-hero h1 { font-size: clamp(58px, 7.3vw, 80px); } .editorial-hero__note { max-width: 290px; } .editorial-hero__description { max-width: 365px; } .editorial-hero__footer > p > span { display: block; margin-left: 0; margin-top: 4px; } }
+@media (max-width: 760px) { .editorial-hero__intro { padding-top: 25px; } .editorial-hero__identity, .editorial-hero__location { font-size: 9px; } .editorial-hero__location span { margin-left: 7px; } .editorial-hero__grid { grid-template-columns: 1fr; padding-top: 50px; padding-bottom: 28px; gap: 38px; } .editorial-hero__role { font-size: 10px; margin-bottom: 24px; } .editorial-hero h1 { font-size: clamp(56px, 12.4vw, 88px); margin-bottom: 27px; } .editorial-hero__description { font-size: 15px; max-width: 430px; } .editorial-hero__note { max-width: none; } .editorial-hero__artwork { width: 100%; max-width: 540px; justify-self: center; } .editorial-hero__artwork-top { padding-left: 0; padding-right: 0; } .editorial-hero__footer { flex-wrap: wrap; padding: 22px 0; gap: 18px; } .editorial-hero__footer > p { flex: 1; font-size: 11px; } .editorial-hero__disciplines { order: 3; width: 100%; gap: 16px; font-size: 9px; } .editorial-hero__disciplines span + span::before { margin-right: 16px; } .editorial-hero__scroll { margin-left: 0; } }
+@media (max-width: 360px) { .editorial-hero h1 { font-size: 50px; } .editorial-hero__location { max-width: 77px; text-align: right; } .editorial-hero__actions { gap: 12px; } .editorial-hero__primary { gap: 14px; padding-left: 18px; font-size: 12px; } .editorial-hero__download { font-size: 12px; gap: 10px; } }
+@media (prefers-reduced-motion: reduce) { .editorial-hero *, .editorial-hero *::before { transition: none !important; } }
+:global(html[data-motion='paused'] .editorial-hero *) { transition: none !important; }
 </style>

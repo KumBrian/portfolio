@@ -6,6 +6,12 @@ export interface Project {
   role: string
   highlights: string[]
   color: string
+  engagement?: string
+  organization?: string
+  contribution?: string
+  filters?: string[]
+  url?: string
+  evidence?: string
 }
 
 export interface Service {
